@@ -60,7 +60,7 @@ def format_countdown(event: Event) -> str:
 
     # Pulsing icon when ≤ 10 seconds
     if total_seconds <= 10:
-        icon = "🔴" if seconds % 2 == 0 else "⚪"
+        icon = "🔴" if seconds % 2 == 0 else "⭕"
     else:
         icon = "⏱"
 
