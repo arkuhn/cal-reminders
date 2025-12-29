@@ -41,36 +41,40 @@ def truncate(text: str, max_len: int = 20) -> str:
 def format_countdown(event: Event) -> str:
     """Format the countdown string for the menubar.
     
-    > 1 hour: "2h 15m"
-    > 5 min:  "45m"
-    ≤ 5 min:  "4:59" (with seconds)
+    > 1 hour:  "2h 15m"
+    > 5 min:   "45m"
+    ≤ 5 min:   "4:59" (with seconds)
+    ≤ 10 sec:  Pulsing red/white icon
     """
     now = datetime.now(timezone.utc)
     delta = event.start_time - now
     total_seconds = int(delta.total_seconds())
 
     if total_seconds <= 0:
-        return f"⏱ NOW — {truncate(event.title)}"
+        return f"🔴 NOW — {truncate(event.title)}"
 
     total_minutes = total_seconds // 60
     hours = total_minutes // 60
     minutes = total_minutes % 60
     seconds = total_seconds % 60
 
+    # Pulsing icon when ≤ 10 seconds
+    if total_seconds <= 10:
+        icon = "🔴" if seconds % 2 == 0 else "⚪"
+    else:
+        icon = "⏱"
+
     if hours > 0:
-        # More than an hour: "2h 15m"
         if minutes > 0:
             time_str = f"{hours}h {minutes}m"
         else:
             time_str = f"{hours}h"
     elif total_minutes > 5:
-        # More than 5 min: "45m"
         time_str = f"{total_minutes}m"
     else:
-        # 5 min or less: "4:59"
         time_str = f"{minutes}:{seconds:02d}"
 
-    return f"⏱ {time_str} — {truncate(event.title)}"
+    return f"{icon} {time_str} — {truncate(event.title)}"
 
 
 def format_relative_time(event: Event) -> str:
