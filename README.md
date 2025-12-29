@@ -1,5 +1,8 @@
 # Cal Reminders
 
+> "Doesn't [MeetingBar](https://github.com/leits/MeetingBar) already do this?"  
+> "Yes, but I built this before I knew that."
+
 A macOS menubar app that displays a persistent countdown to your next calendar event.
 
 Works with any calendar synced to macOS — Google, iCloud, Outlook, etc. No API keys or OAuth required.
