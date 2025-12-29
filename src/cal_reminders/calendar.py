@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import re
 import threading
 
@@ -69,7 +69,6 @@ class CalendarService:
         if hours_ahead is None:
             hours_ahead = self.config["lookahead_hours"]
 
-        now = datetime.now(timezone.utc)
         start_date = NSDate.date()
         end_date = NSDate.dateWithTimeIntervalSinceNow_(hours_ahead * 3600)
 
