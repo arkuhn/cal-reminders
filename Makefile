@@ -6,7 +6,7 @@ install: build
 	@rm -rf "/Applications/Cal Reminders.app"
 	@cp -r "dist/Cal Reminders.app" /Applications/
 	@echo "✓ Installed to /Applications/Cal Reminders.app"
-	@echo "Run: open '/Applications/Cal Reminders.app'"
+	@open "/Applications/Cal Reminders.app"
 
 # Build the .app bundle
 build: check-uv
