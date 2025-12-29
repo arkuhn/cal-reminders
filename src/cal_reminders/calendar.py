@@ -41,6 +41,12 @@ class Event:
     url: str | None = None
 
 
+@dataclass
+class CalendarInfo:
+    title: str
+    identifier: str
+
+
 class CalendarService:
     def __init__(self):
         self.store = EKEventStore.alloc().init()
@@ -48,6 +54,21 @@ class CalendarService:
         self.access_granted = False
         self.access_checked = threading.Event()
         self._request_access()
+
+    def get_all_calendars(self) -> list[CalendarInfo]:
+        """Get list of all available calendars."""
+        if not self.access_granted:
+            return []
+        
+        calendars = self.store.calendarsForEntityType_(EKEntityTypeEvent)
+        return [
+            CalendarInfo(title=cal.title(), identifier=cal.calendarIdentifier())
+            for cal in calendars
+        ]
+
+    def reload_config(self):
+        """Reload config from disk."""
+        self.config = load_config()
 
     def _request_access(self):
         def callback(granted, error):
@@ -72,7 +93,18 @@ class CalendarService:
         start_date = NSDate.date()
         end_date = NSDate.dateWithTimeIntervalSinceNow_(hours_ahead * 3600)
 
-        calendars = self.store.calendarsForEntityType_(EKEntityTypeEvent)
+        all_calendars = self.store.calendarsForEntityType_(EKEntityTypeEvent)
+        
+        # Filter to enabled calendars if configured
+        enabled = self.config.get("enabled_calendars")
+        if enabled is not None:
+            calendars = [c for c in all_calendars if c.title() in enabled]
+        else:
+            calendars = all_calendars
+        
+        if not calendars:
+            return []
+        
         predicate = self.store.predicateForEventsWithStartDate_endDate_calendars_(
             start_date, end_date, calendars
         )

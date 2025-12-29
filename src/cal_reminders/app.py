@@ -4,7 +4,7 @@ import rumps
 from datetime import datetime, timezone
 
 from .calendar import CalendarService, Event, extract_meeting_link
-from .config import load_config
+from .config import load_config, save_config
 
 
 def is_login_item() -> bool:
@@ -169,6 +169,43 @@ class CalRemindersApp(rumps.App):
         """Open Calendar.app."""
         subprocess.run(["open", "-a", "Calendar"])
 
+    def toggle_calendar(self, sender):
+        """Toggle a calendar on/off."""
+        calendar_title = sender.title
+        enabled = self.config.get("enabled_calendars")
+        
+        if enabled is None:
+            # First time toggling - start with all calendars, then remove this one
+            all_cals = [c.title for c in self.calendar_service.get_all_calendars()]
+            enabled = [c for c in all_cals if c != calendar_title]
+        elif calendar_title in enabled:
+            enabled.remove(calendar_title)
+        else:
+            enabled.append(calendar_title)
+        
+        # If all calendars enabled, set to None (default)
+        all_cals = [c.title for c in self.calendar_service.get_all_calendars()]
+        if set(enabled) == set(all_cals):
+            enabled = None
+        
+        self.config["enabled_calendars"] = enabled
+        save_config(self.config)
+        self.calendar_service.reload_config()
+        self.refresh_events(None)
+
+    def build_calendars_menu(self) -> rumps.MenuItem:
+        """Build the Calendars submenu."""
+        calendars_menu = rumps.MenuItem("Calendars")
+        all_calendars = self.calendar_service.get_all_calendars()
+        enabled = self.config.get("enabled_calendars")
+        
+        for cal in sorted(all_calendars, key=lambda c: c.title):
+            item = rumps.MenuItem(cal.title, callback=self.toggle_calendar)
+            item.state = enabled is None or cal.title in enabled
+            calendars_menu.add(item)
+        
+        return calendars_menu
+
     def update_menu(self):
         """Update the dropdown menu content."""
         self.menu.clear()
@@ -204,6 +241,7 @@ class CalRemindersApp(rumps.App):
                 None,
                 rumps.MenuItem("Open Calendar", callback=self.open_in_calendar),
                 rumps.MenuItem("Refresh Now", callback=self.refresh_events),
+                self.build_calendars_menu(),
                 login_item,
                 None,
                 rumps.MenuItem("Quit", callback=rumps.quit_application),
@@ -216,6 +254,7 @@ class CalRemindersApp(rumps.App):
                 None,
                 rumps.MenuItem("Open Calendar", callback=self.open_in_calendar),
                 rumps.MenuItem("Refresh Now", callback=self.refresh_events),
+                self.build_calendars_menu(),
                 login_item,
                 None,
                 rumps.MenuItem("Quit", callback=rumps.quit_application),

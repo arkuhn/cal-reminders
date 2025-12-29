@@ -7,6 +7,7 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 DEFAULTS = {
     "refresh_interval_seconds": 60,
     "lookahead_hours": 8,
+    "enabled_calendars": None,  # None = all calendars enabled
 }
 
 
