@@ -1,0 +1,40 @@
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# uv
+uv.lock
+
+# PyInstaller
+*.manifest
+*.spec.bak
+
+# App-specific
+credentials.json
+token.json
+
+# Spec (internal planning doc)
+SPEC.md
+
